@@ -11,9 +11,11 @@ public:
     int x, y; // позиция свина по осям X и Y
     double X, Y; // для функции перемещения
     char health_lvl; // уровень здоровья свиньи
+    int direction = 1;
 
     Pig(int startX, int startY, int hitx, int hitY, int health); // конструктор
-    void moving(); // перемещение свина (авто)
+    void moving(); // перемещение свина
+    void negative_moving();
     void draw(); // отобразить свина на экране
     void health_down(); // уменьшение здоровья
 };

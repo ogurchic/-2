@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="bigpig.h" />
     <ClInclude Include="bullet.h" />
+    <ClInclude Include="minipig.h" />
     <ClInclude Include="pig.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="ship.h" />

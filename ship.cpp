@@ -41,16 +41,16 @@ void Ship::healthDown()
 
 void Ship::draw() // отобразить корабль на экране
 {
-    drawString(x, y, "       !       ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 1, "      /-\\     ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 2, "     |--o|    ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 3, "     |---|    ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 4, "    /.....\\   ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 5, "   |   U   |  ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 6, "   |   S   |  ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 7, "   |   S   |  ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 8, "  /|   R   |\\ ", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 9, " / |_______| \\ ", frontBuffer, FOREGROUND_RED);
+    drawString(x + 7, y, "!", frontBuffer, FOREGROUND_RED);
+    drawString(x + 6, y + 1, "/-\\", frontBuffer, FOREGROUND_RED);
+    drawString(x + 5, y + 2, "|--o|", frontBuffer, FOREGROUND_RED);
+    drawString(x + 5, y + 3, "|---|", frontBuffer, FOREGROUND_RED);
+    drawString(x + 4, y + 4, "/.....\\", frontBuffer, FOREGROUND_RED);
+    drawString(x + 3, y + 5, "|   U   |", frontBuffer, FOREGROUND_RED);
+    drawString(x + 3, y + 6, "|   S   |", frontBuffer, FOREGROUND_RED);
+    drawString(x + 3, y + 7, "|   S   |", frontBuffer, FOREGROUND_RED);
+    drawString(x + 2, y + 8, "/|   R   |\\", frontBuffer, FOREGROUND_RED);
+    drawString(x + 1, y + 9, "/ |_______| \\", frontBuffer, FOREGROUND_RED);
     drawString(x, y + 10, "####|@|#|@|####", frontBuffer, FOREGROUND_RED);
-    drawString(x, y + 11, "     @   @     ", frontBuffer, FOREGROUND_RED);
+    drawString(x + 5, y + 11, "@   @", frontBuffer, FOREGROUND_RED);
 }

@@ -20,14 +20,14 @@ int main()
     Ship ship(screenWidth / 2 - 6, screenHeight - 13, 3, shipHitX, shipHitY); // создание корабля с начальной позицией в центральной нижней части экрана
     std::vector <Pig> pigs; // создание вектора хранения свиней
     std::vector <Bullet> bullets; // создание вектора для хранения пуль
-    BigPig bigpig(screenWidth - 70, screenHeight / 2 - 16, bigpigHitX, bigpigHitY, 10);
+    std::vector <BigPig> bigpigs;
 
-    int score = 0; // счёт игры
+    int score = 10; // счёт игры
 
     DWORD lastCollisionTime = 0; // для интервала между нанесением урона кораблю
     DWORD lastBulletStartTime = 0; // для интервала между стрельбой
     DWORD lastPigStartTime = 0; // для интервала между выпусканием новых свиней
-
+    DWORD lastBigpigStartTime = 0;
 
     // инициализация переднего и заднего буферов
     for (int i = 0; i < screenWidth * screenHeight; i++)
@@ -41,10 +41,15 @@ int main()
 
     while (ship.health_lvl > 0) // игровой цикл
     {
-        if (GetTickCount() - lastPigStartTime >= 10000) // если прошло достаточно времени с момента последнего вызова свиньи
+        if (GetTickCount() - lastPigStartTime >= 7000) // если прошло достаточно времени с момента последнего вызова свиньи
         {
             pigs.push_back(Pig(0, 0, pigHitX, pigHitY, 5)); // создание новой свиньи 
             lastPigStartTime = GetTickCount(); // обновление времени последнего вывода свиньи
+        }
+
+        if (GetTickCount() - lastBigpigStartTime >= 120000 && score >= 10) {
+            bigpigs.push_back(BigPig(screenWidth - 94, screenHeight / 2 - 16, bigpigHitX, bigpigHitY, 10));
+            lastBigpigStartTime = GetTickCount();
         }
 
         if (_kbhit()) // если игрок нажал клавишу
@@ -72,7 +77,7 @@ int main()
             }
             else if (key == ' ') // если нажата клавиша пробела (выстрел)
             {
-                if (GetTickCount() - lastBulletStartTime >= 700) // если прошло достаточно времени с момента последнего выстрела
+                if (GetTickCount() - lastBulletStartTime >= 1000) // если прошло достаточно времени с момента последнего выстрела
                 {
                     bullets.push_back(Bullet(ship.x + 7, ship.y, bulletHitX, bulletHitY)); // создание новой пули с начальной позицией в корабле
                     lastBulletStartTime = GetTickCount(); // обновление времени последнего выстрела
@@ -80,13 +85,56 @@ int main()
             }
         }
 
+        for (auto it = pigs.begin(); it != pigs.end();) // обход всех свиней 
+        {
+            if (it->health_lvl <= 0) // если здоровье свиньи равно 0 или меньше
+            {
+                it = pigs.erase(it); // удаление свиньи из вектора
+                score++; // увеличение счёта за мервую свинью
+            }
 
-        bigpig.moving();
-            // Отображение игрового экрана
+            else
+            {
+                ++it; // переход к следующей свинье
+            }
+        }
 
-        bigpig.draw();
+        for (auto it = bigpigs.begin(); it != bigpigs.end();) // обход всех свиней 
+        {
+            if (it->health_lvl <= 0) // если здоровье свиньи равно 0 или меньше
+            {
+                it = bigpigs.erase(it); // удаление свиньи из вектора
+                score += 10; // увеличение счёта за мервую свинью
+            }
+            if (it->bigX <= 0)
+                it = bigpigs.erase(it);
+            else
+            {
+                ++it; // переход к следующей свинье
+            }
+        }
 
-        for (Pig& pig : pigs) // побход всех свиней в векторе свиней
+
+
+//______________ Отображение игрового экрана___________
+
+        for (BigPig& bigpig : bigpigs) // побход всех big свиней в векторе big свиней
+        {
+            // проверка на столкновение свиньи и корабля
+            if (checkCollision(ship.x, ship.y, shipHitX, shipHitY, bigpig.bigX, bigpig.bigY, bigpigHitX, bigpigHitY)) 
+            {
+                if (GetTickCount() - lastCollisionTime > 1000) { // интервал между потерей хп
+                    ship.healthDown(); // потеря хп
+                    bigpig.health_down();
+                    lastCollisionTime = GetTickCount(); // обновите время последнего столкновения
+                }
+            }
+            bigpig.moving(); // перемещение свиньи
+            bigpig.draw(); // отображение свиньи на экране
+        }
+
+
+        for (Pig& pig : pigs) // обход всех свиней в векторе свиней
         {
             if (checkCollision(ship.x, ship.y, shipHitX, shipHitY, pig.X, pig.Y, pigHitX, pigHitY)) // проверка на столкновение свиньи и корабля
             {
@@ -96,7 +144,16 @@ int main()
                     lastCollisionTime = GetTickCount(); // обновите время последнего столкновения
                 }
             }
-            pig.moving(); // перемещение свиньи
+            if (pig.X >= screenWidth - 63)
+                pig.direction = -1;
+            if (pig.X <= pigHitX)
+                pig.direction = 1;
+
+            if (pig.direction == 1)
+                pig.moving(); // перемещение свиньи
+            if (pig.direction == -1)  
+                pig.negative_moving();
+            
             pig.draw(); // отображение свиньи на экране
         }
 
@@ -115,23 +172,17 @@ int main()
                     pig.health_down(); // уменьшение здоровья свиньи
                 }
             }
-        }
-        
-        for (auto it = pigs.begin(); it != pigs.end();) // обход всех свиней 
-        {
-            if (it->health_lvl <= 0) // если здоровье свиньи равно 0 или меньше
-            {
-                it = pigs.erase(it); // удаление свиньи из вектора
-                score++; // увеличение счёта за мервую свинью
-            }
-            else if(it->X > screenWidth - 63 || it->X < - 14 || it->Y > screenHeight - 9 || it->Y < - 9)
-                it = pigs.erase(it); // удаление свина после выхода за границу
-            else
-            {
-                ++it; // переход к следующей свинье
-            }
-        }
 
+            for (BigPig& bigpig : bigpigs)
+            {
+                // проверка на столкновение пули и свинньи
+                if (checkCollision(bullet.bullet_x, bullet.bullet_y, bulletHitX, bulletHitY, bigpig.bigX, bigpig.bigY, bigpigHitX, bigpigHitY)) {
+                    bullets.erase(std::remove(bullets.begin(), bullets.end(), bullet), bullets.end()); // удаление попавшей пули
+                    bigpig.health_down(); // уменьшение здоровья свиньи
+                }
+            }
+        }
+       
         // рамки и контекст
         for (int i = 0; i <= screenWidth; i++) {
             for (int j = 0; j <= screenHeight; j++) {
@@ -147,12 +198,6 @@ int main()
                     std::string str = "Your score: " + std::to_string(score);
                     const char* scoreText = str.c_str();
                     drawString(i, j, scoreText, frontBuffer, FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED); // вывод текущего счёта
-                }
-                if (i == screenWidth - 45 && j == 20) { // для проверки работоспособности программы, вывод здоровья последней в векторе свиньи
-                    int num = pigs.back().health_lvl;
-                    std::string str = "Pig`s health level: " + std::to_string(num);
-                    const char* cstr = str.c_str();
-                    drawString(i, j, cstr, frontBuffer, FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
                 }
             }
         }
